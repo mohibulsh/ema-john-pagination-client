@@ -29,7 +29,6 @@ const Shop = () => {
     fetchData()
   },[currentPage,itemsPerPage])
       
- 
 
     useEffect(() => {
         const storedCart = getShoppingCart();

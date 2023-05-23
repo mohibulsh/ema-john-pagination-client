@@ -14,36 +14,46 @@ const Shop = () => {
     const totalPages = Math.ceil(totalProducts / itemsPerPage)
     const pagesNumber = [...Array(totalPages).keys()]
 
-    // useEffect(() => {
-    //     fetch('http://localhost:5000/products')
-    //         .then(res => res.json())
-    //         .then(data => setProducts(data))
-    // }, []);
-    
-  useEffect(()=>{
-    async function fetchData () {
-        const respone = await fetch (`http://localhost:5000/products?page=${currentPage}&limit=${itemsPerPage}`);
-        const data = await respone.json()
-        setProducts(data)
-    }
-    fetchData()
-  },[currentPage,itemsPerPage])
-      
-
     useEffect(() => {
-        const storedCart = getShoppingCart();
-        const savedCart = [];
-        for (const id in storedCart) {
-            const addedProduct = products.find(product => product._id === id)
-            if (addedProduct) {
-                const quantity = storedCart[id];
-                addedProduct.quantity = quantity;
-                savedCart.push(addedProduct);
-            }
-
+        async function fetchData() {
+            const respone = await fetch(`http://localhost:5000/products?page=${currentPage}&limit=${itemsPerPage}`);
+            const data = await respone.json()
+            setProducts(data)
         }
-        setCart(savedCart);
-    }, [products])
+        fetchData()
+    }, [currentPage, itemsPerPage])
+
+    //new set the store cart
+    const storedCart = getShoppingCart();
+    const ids =Object.keys(storedCart)
+    fetch(`http://localhost:5000/productsById`, {
+        method: 'POST',
+        headers: {
+            'content-type': 'application/json'
+        },
+        body: JSON.stringify({ ids })
+    })
+    .then(res=>res.json())
+    .then(storProducts=>{
+        useEffect(() => {
+            // const storedCart = getShoppingCart();
+            // const savedCart = [];
+            // console.log(storedCart)
+            for (const id in storedCart) {
+                const addedProduct = storProducts.find(product => product._id === id)
+                if (addedProduct) {
+                    const quantity = storedCart[id];
+                    addedProduct.quantity = quantity;
+                    savedCart.push(addedProduct);
+                }
+    
+            }
+            setCart(savedCart);
+        }, [products])
+    })
+
+ 
+
 
     const handleAddToCart = (product) => {
         let newCart = [];
@@ -61,12 +71,14 @@ const Shop = () => {
         setCart(newCart);
         addToDb(product._id)
     }
-    const options = [5, 10, 20];
+    
     const handleClearCart = () => {
         setCart([]);
         deleteShoppingCart();
     }
+
     //pagination handlerClick
+    const options = [5, 10, 20];
     const handlerClick = (num) => {
         setCurrentPage(num)
     }
@@ -75,7 +87,7 @@ const Shop = () => {
         const selectedSize = parseInt(event.target.value, 10);
         setItemsPerPage(selectedSize);
         setCurrentPage(0);
-      };
+    };
 
     return (
         <>

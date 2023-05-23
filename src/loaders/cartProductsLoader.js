@@ -11,7 +11,7 @@ const cartProductsLoader = async () => {
         headers:{
             'content-type':'application/json'
         },
-        body:JSON.stringify(ids)
+        body:JSON.stringify({ids})
     });
     const products = await loadedProducts.json();
     console.log(products)
